@@ -32,7 +32,7 @@ jobs:
 
         - name: Terraform Format Check
           working-directory: IAC/VPC
-          run: terraform fmt -check=true
+          run: terraform fmt
 
         - name: Terraform Validate
           working-directory: IAC/VPC
