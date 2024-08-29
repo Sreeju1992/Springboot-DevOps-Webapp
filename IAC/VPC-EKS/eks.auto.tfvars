@@ -1,0 +1,11 @@
+cluster_name = "eksdemo"
+cluster_service_ipv4_cidr = "172.20.0.0/16"
+cluster_version = "1.28"
+ami_type = "AL2_x86_64"
+instance_types = ["t3.medium"]
+cluster_endpoint_private_access = false
+cluster_endpoint_public_access = true
+cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
+min_size = 2
+max_size = 3
+desired_size = 2
