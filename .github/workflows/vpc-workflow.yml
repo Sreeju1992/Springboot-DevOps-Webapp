@@ -32,6 +32,7 @@ jobs:
           with:
             aws-region: us-east-1
             role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
+            role-session-name: GitHubActions
 
         - name: Terraform init
           working-directory: IAC/VPC-EKS
