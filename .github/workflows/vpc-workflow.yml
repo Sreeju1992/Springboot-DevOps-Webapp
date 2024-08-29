@@ -58,7 +58,7 @@ jobs:
 
         - name: Terraform Delete
           working-directory: IAC/VPC-EKS
-          run: terraform delete -auto-approve
+          run: terraform destroy -auto-approve
         
             
           
