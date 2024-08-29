@@ -57,7 +57,7 @@ jobs:
 
         - name: Get EKS Cluster kubeconfig
           run: |
-            aws eks update-kubeconfig --name Rakbank-Dev-eksdemo
+            aws eks update-kubeconfig --name Rakbank-Dev-eksdemo --region us-east-1 --role-arn arn:aws:iam::853154372899:role/Rakbank-Githubrunner-role
 
         - name: Retrieve aws-auth ConfigMap
           run: |
