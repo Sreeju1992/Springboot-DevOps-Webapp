@@ -1,0 +1,51 @@
+name: VPC resource provisioning workflow
+on: workflow_dispatch
+
+permissions:
+    id-token: write
+    contents: read
+
+jobs:
+    vpc_ci:
+        name: "VPC Build"
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: "1.7.3"
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-region: us-east-1
+            role-to-assume: arn:aws:iam::853154372899:role/Rakbank-Githubrunner-role
+
+        - name: Terraform init
+          working-directory: IAC/VPC
+          run: terraform init
+          continue-on-error: false
+
+        - name: Terraform Format Check
+          working-directory: IAC/VPC
+          run: terraform fmt -check=true
+
+        - name: Terraform Validate
+          working-directory: IAC/VPC
+          run: terraform validate
+          continue-on-error: false
+
+        - name: Terraform Plan
+          working-directory: IAC/VPC
+          run: terraform plan
+
+        - name: Terraform Apply
+          working-directory: IAC/VPC
+          run: terraform apply -auto-approve
+        
+            
+          
