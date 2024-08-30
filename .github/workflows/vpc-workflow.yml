@@ -56,6 +56,15 @@ jobs:
           working-directory: IAC/VPC-EKS
           run: terraform apply -auto-approve
 
+        - name: Get EKS Cluster kubeconfig
+          run: |
+            aws eks update-kubeconfig --name Rakbank-Dev-eksdemo --region us-east-1
+
+        - name: Retrieve aws-auth ConfigMap
+          run: |
+            kubectl get configmap aws-auth -n kube-system -o yaml
+
+
 
         
             
