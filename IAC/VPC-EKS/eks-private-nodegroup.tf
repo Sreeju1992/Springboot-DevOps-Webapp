@@ -11,8 +11,8 @@ resource "aws_eks_node_group" "eks_ng_private" {
   instance_types = ["t3.medium"]
 
   remote_access {
-    ec2_ssh_key = aws_key_pair.aws-login.key_name
-    source_security_group_ids = [aws_security_group.access-rules.id]
+    ec2_ssh_key = aws_key_pair.bastion-login.key_name
+    source_security_group_ids = [aws_security_group.bastion-access-rules.id]
   }
 
   scaling_config {
