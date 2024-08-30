@@ -1,35 +1,25 @@
-module "eks" {
-   source  = "terraform-aws-modules/eks/aws"
-   version = "20.0"
+resource "aws_eks_cluster" "eks_cluster" {
+  name     = "${local.name}-${var.cluster_name}"
+  role_arn = aws_iam_role.eks_master_role.arn
+  version = var.cluster_version
 
-   cluster_name    = "${local.name}-${var.cluster_name}"
-   cluster_version = var.cluster_version
-   cluster_endpoint_public_access = var.cluster_endpoint_public_access
-   cluster_endpoint_private_access = var.cluster_endpoint_private_access
-   cluster_service_ipv4_cidr = var.cluster_service_ipv4_cidr
+  vpc_config {
+    subnet_ids = module.vpc.public_subnets
+    endpoint_private_access = var.cluster_endpoint_private_access
+    endpoint_public_access = var.cluster_endpoint_public_access
+    public_access_cidrs = var.cluster_endpoint_public_access_cidrs
+  }
 
-   # EKS Addons
-   cluster_addons = {
-     coredns                = {}
-     eks-pod-identity-agent = {}
-     kube-proxy             = {}
-     vpc-cni                = {}
-   }
+  kubernetes_network_config {
+    service_ipv4_cidr = var.cluster_service_ipv4_cidr
+  }
 
-   vpc_id     = module.vpc.vpc_id
-   subnet_ids = module.vpc.private_subnets
-
-   enable_irsa = true
-
-   eks_managed_node_groups = {
-      private_node_group = {
-        ami_type       = var.ami_type
-        instance_types = var.instance_types
-        min_size       = var.min_size
-        max_size       = var.max_size
-        desired_size   = var.desired_size
-      } 
-   }
-
-   tags = local.common_tags
+  # Enable EKS Cluster control plane logging
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
+  # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
+  depends_on = [
+    aws_iam_role_policy_attachment.eks-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.eks-AmazonEKSVPCResourceController,
+  ]
 }

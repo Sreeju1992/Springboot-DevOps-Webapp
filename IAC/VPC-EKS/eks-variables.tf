@@ -1,16 +1,9 @@
+# EKS Cluster input variables
+
 variable "cluster_name" {
     description = "Name of EKS cluster"
     type = string
-}
-
-variable "instance_types" {
-    description = "Type of the instance"
-    type = list(string)
-}
-
-variable "ami_type" {
-    description = "AMI Type"
-    type = string
+    default = "eksdemo"
 }
 
 variable "cluster_service_ipv4_cidr" {
@@ -40,19 +33,4 @@ variable "cluster_endpoint_public_access_cidrs" {
   description = "List of CIDR blocks which can access the Amazon EKS public API server endpoint."
   type        = list(string)
   default     = ["0.0.0.0/0"]
-}
-
-variable "min_size" {
-    type = number
-    description = "Minimum number of nodes"
-}
-
-variable "max_size" {
-    type = number
-    description = "Maximum number of nodes"
-}
-
-variable "desired_size" {
-    type = number
-    description = "Desired number of nodes"
 }
