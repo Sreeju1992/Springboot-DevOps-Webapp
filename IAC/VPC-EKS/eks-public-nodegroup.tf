@@ -10,9 +10,6 @@ resource "aws_eks_node_group" "eks_ng_public" {
   disk_size = 20
   instance_types = ["t3.medium"]
 
-  remote_access {
-    ec2_ssh_key = aws_key_pair.bastion-login.key_name
-  }
 
   scaling_config {
     desired_size = 2
