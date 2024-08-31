@@ -45,5 +45,6 @@ resource "helm_release" "aws_load_balancer_controller" {
     name  = "aws.loadBalancerController.enable"
     value = "true"  # Ensure the controller is enabled
   }
+  depends_on = [null_resource.update_kubeconfig]
 
 }
