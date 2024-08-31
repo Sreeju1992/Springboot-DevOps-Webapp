@@ -1,9 +1,14 @@
 # EKS Cluster input variables
 
+variable "region" {
+   type = string
+   default = "us-east-1"
+}
+
 variable "cluster_name" {
     description = "Name of EKS cluster"
     type = string
-    default = "eksdemo"
+    default = "eksdemo1"
 }
 
 variable "cluster_service_ipv4_cidr" {
@@ -34,3 +39,4 @@ variable "cluster_endpoint_public_access_cidrs" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
+
