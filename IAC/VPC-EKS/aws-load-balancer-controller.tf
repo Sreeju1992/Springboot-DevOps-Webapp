@@ -45,5 +45,6 @@ resource "helm_release" "aws_load_balancer_controller" {
     name  = "aws.loadBalancerController.enable"
     value = "true"  # Ensure the controller is enabled
   }
+  depends_on = [aws_eks_cluster.eks_cluster,aws_eks_node_group.eks_ng_private,aws_eks_node_group.eks_ng_public,kubernetes_service_account.alb_ingress_controller_sa]
 
 }
