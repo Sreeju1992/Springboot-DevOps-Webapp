@@ -11,6 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
           cluster_name: ${{ steps.terraform_outputs.outputs.cluster_name }}
+          vpc_id: ${{ steps.terraform_outputs.outputs.vpc_id }}
         steps:
         - name: Checkout code
           uses: actions/checkout@v4
@@ -74,6 +75,7 @@ jobs:
           working-directory: IAC/VPC-EKS
           run: |
             echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+            echo "vpc_id"=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
 
     alb_ci:
         name: alb_build
@@ -140,7 +142,8 @@ jobs:
             working-directory: IAC/alb
             env:
               CLUSTER_NAME: ${{ needs.vpc_ci.outputs.cluster_name }}
-            run: terraform apply -var="cluster_name=${CLUSTER_NAME}" -auto-approve
+              VPC_ID: ${{ needs.vpc_ci.outputs.vpc_id }}
+            run: terraform apply -var="cluster_name=${CLUSTER_NAME}" -var="vpc_id=${VPC_ID}" -auto-approve
 
           - name: Retrieve aws-auth ConfigMap
             run: |
