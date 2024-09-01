@@ -162,6 +162,7 @@ jobs:
               kubectl get ingress
               kubectl describe ingress hello-rakbank-springboot-app
               kubectl describe pod hello-rakbank-springboot-app-6bdccdfb96-jw7kz
-              kubectl logs -f hello-rakbank-springboot-app-6bdccdfb96-jw7kz 
+              kubectl logs -f hello-rakbank-springboot-app-6bdccdfb96-jw7kz
+              kubectl logs -f aws-load-balancer-controller-8c59b9bdd-5g6pf -n kube-system
 
           
