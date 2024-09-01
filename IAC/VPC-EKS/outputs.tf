@@ -4,6 +4,10 @@ output "cluster_id" {
   value       = aws_eks_cluster.eks_cluster.id
 }
 
+output "cluster_name" {
+  value = aws_eks_cluster.eks_cluster.name
+}
+
 output "cluster_arn" {
   description = "The Amazon Resource Name (ARN) of the cluster."
   value       = aws_eks_cluster.eks_cluster.arn

@@ -9,7 +9,8 @@ jobs:
     vpc_ci:
         name: "VPC Build"
         runs-on: ubuntu-latest
-
+        outputs:
+          cluster_name: ${{ steps.terraform_outputs.outputs.cluster_name }}
         steps:
         - name: Checkout code
           uses: actions/checkout@v4
@@ -54,10 +55,7 @@ jobs:
           run: terraform validate
           continue-on-error: false
 
-        - name: Setting EKS Cluster kubeconfig
-          run: |
-            aws eks update-kubeconfig --name Rakbank-Dev-eksdemo1 --region us-east-1 --role-arn arn:aws:iam::853154372899:role/Rakbank-Githubrunner-role
-
+        
         - name: Terraform Plan
           working-directory: IAC/VPC-EKS
           run: terraform plan
@@ -67,15 +65,86 @@ jobs:
           working-directory: IAC/VPC-EKS
           run: terraform apply -auto-approve
 
-        - name: Get EKS Cluster kubeconfig
+        - name: Get terraform outputs
+          id: terraform_outputs
+          working-directory: IAC/VPC-EKS
           run: |
-            aws eks update-kubeconfig --name Rakbank-Dev-eksdemo1 --region us-east-1 --role-arn arn:aws:iam::853154372899:role/Rakbank-Githubrunner-role
+            echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
 
-        - name: Retrieve aws-auth ConfigMap
-          run: |
-            kubectl get configmap aws-auth -n kube-system -o yaml
+    alb_ci:
+        name: alb_build
+        runs-on: ubuntu-latest
+        needs: vpc_ci
 
-        - name: Check ALB pods
-          run: |
-            kubectl get pods -n kube-system
-            kubectl get sa -n kube-system
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+  
+          - name: Setup Terraform
+            uses: hashicorp/setup-terraform@v3
+            with:
+              terraform_version: "1.7.3"
+  
+  
+          - name: Install kubectl
+            run: |
+              curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+              chmod +x ./kubectl
+              sudo mv ./kubectl /usr/local/bin/kubectl
+  
+          - name: Install Helm
+            run: |
+              curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+              chmod 700 get_helm.sh
+              ./get_helm.sh
+            
+  
+          - name: Configure AWS Credentials
+            uses: aws-actions/configure-aws-credentials@v4
+            with:
+              aws-region: us-east-1
+              role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
+              role-session-name: GitHubActions
+
+          - name: Setup EKS Cluster kubeconfig
+            env:
+              CLUSTER_NAME: ${{ needs.vpc_ci.outputs.cluster_name }}
+            run: |
+              aws eks update-kubeconfig --name $CLUSTER_NAME --region us-east-1 --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
+  
+          - name: Terraform init
+            working-directory: IAC/alb
+            run: terraform init
+            continue-on-error: false
+    
+          - name: Terraform Format Check
+            working-directory: IAC/alb
+            run: terraform fmt
+    
+          - name: Terraform Validate
+            working-directory: IAC/alb
+            run: terraform validate
+            continue-on-error: false
+    
+            
+          - name: Terraform Plan
+            working-directory: IAC/alb
+            run: terraform plan
+    
+            
+          - name: Terraform Apply
+            working-directory: IAC/alb
+            env:
+              CLUSTER_NAME: ${{ needs.vpc_ci.outputs.cluster_name }}
+            run: terraform apply -var="cluster_name=${CLUSTER_NAME}" -auto-approve
+
+          - name: Retrieve aws-auth ConfigMap
+            run: |
+              kubectl get configmap aws-auth -n kube-system -o yaml
+  
+          - name: Check ALB pods
+            run: |
+              kubectl get pods -n kube-system
+              kubectl get sa -n kube-system
+
+          
