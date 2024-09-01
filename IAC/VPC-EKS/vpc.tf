@@ -22,11 +22,13 @@ module "vpc" {
   public_subnet_tags = {
     Type = "public-subnets"
     "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/Rakbank-Dev-eksdemo1" = "shared"
   }
 
   private_subnet_tags = {
     Type = "private-subnets"
     "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/Rakbank-Dev-eksdemo1" = "shared"
   }
 
  
