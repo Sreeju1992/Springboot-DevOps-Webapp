@@ -156,5 +156,10 @@ jobs:
             run: |
               kubectl get pods -n kube-system
               kubectl get sa -n kube-system
+              kubectl get pods -o wide
+              kubectl get svc -o wide
+              kubectl get deployments -o wide
+              kubectl get ingress
+              kubectl describe ingress hello-rakbank-springboot-app
 
           
