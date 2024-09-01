@@ -75,7 +75,7 @@ jobs:
           working-directory: IAC/VPC-EKS
           run: |
             echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
-            echo "vpc_id"=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
+            echo "vpc_id=$(terraform output -raw vpc_id)" >> $GITHUB_OUTPUT
 
     alb_ci:
         name: alb_build
