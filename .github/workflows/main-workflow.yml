@@ -1,10 +1,9 @@
-name: Build and push Docker Image
-
+name: Main Workflow
 on: workflow_dispatch
 
 jobs:
     build-push-image:
-        uses: .github/workflows/actions/build-and-push.yml
+        uses: .github/workflows/actions/build-and-push.yml@main
         secrets:
             DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -14,13 +13,13 @@ jobs:
             tag: v1
 
     run-tests:
-        uses: .github/workflows/actions/run-tests.yml
+        uses: .github/workflows/actions/run-tests.yml@main
         with:
             test_command: ./mvnw test
 
     deploy:
        needs: [build-push-image, run-tests]
-       uses: .github/workflows/actions/deploy-eks.yml
+       uses: .github/workflows/actions/deploy-eks.yml@main
        secrets:
             role_id: ${{ secrets.ROLE_ID }}
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
