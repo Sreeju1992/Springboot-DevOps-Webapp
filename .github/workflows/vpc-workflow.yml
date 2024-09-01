@@ -161,5 +161,6 @@ jobs:
               kubectl get deployments -o wide
               kubectl get ingress
               kubectl describe ingress hello-rakbank-springboot-app
+              kubectl describe pod hello-rakbank-springboot-app-7dbccc6f49-74zll
 
           
