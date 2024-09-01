@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
     build-push-image:
-        uses: ./.github/workflows/build-and-push.yml@main
+        uses: ./.github/workflows/build-and-push.yml
         secrets:
             DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -13,13 +13,13 @@ jobs:
             tag: v1
 
     run-tests:
-        uses: ./.github/workflows/run-tests.yml@main
+        uses: ./.github/workflows/run-tests.yml
         with:
             test_command: ./mvnw test
 
     deploy:
        needs: [build-push-image, run-tests]
-       uses: ./.github/workflows/deploy-eks.yml@main
+       uses: ./.github/workflows/deploy-eks.yml
        secrets:
             role_id: ${{ secrets.ROLE_ID }}
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
