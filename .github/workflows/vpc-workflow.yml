@@ -135,7 +135,10 @@ jobs:
             
           - name: Terraform Plan
             working-directory: IAC/alb
-            run: terraform plan
+            env:
+              CLUSTER_NAME: ${{ needs.vpc_ci.outputs.cluster_name }}
+              VPC_ID: ${{ needs.vpc_ci.outputs.vpc_id }}
+            run: terraform plan -var="cluster_name=${CLUSTER_NAME}" -var="vpc_id=${VPC_ID}"
     
             
           - name: Terraform Apply
