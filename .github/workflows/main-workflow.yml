@@ -1,0 +1,39 @@
+name: Build and push Docker Image
+
+on: workflow_dispatch
+
+jobs:
+    build-push-image:
+        uses: .github/workflows/actions/build-and-push.yml
+        secrets:
+            DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+        with:
+            app: hellorakbank
+            tag: v1
+
+    run-tests:
+        uses: .github/workflows/actions/run-tests.yml
+        with:
+            test_command: ./mvnw test
+
+    deploy:
+       needs: [build-push-image, run-tests]
+       uses: .github/workflows/actions/deploy-eks.yml
+       secrets:
+            role_id: ${{ secrets.ROLE_ID }}
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+       with:
+          image_name: hellorakbank
+          helm_chart_path: charts/Springboot-app
+          release_name: hello-rakbank
+          region: us-east-1
+          cluster_name: Rakbank-Dev-eksdemo1
+          tag: v1
+
+
+
+
+            
+

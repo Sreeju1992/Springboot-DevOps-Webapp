@@ -1,0 +1,22 @@
+on:
+    workflow_call:
+      inputs:
+        test_command:
+          required: true
+          type: string
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+           - name: Checkout code
+             uses: actions/checkout@v4
+
+           - name: Setup Java
+             uses: actions/setup-java@v4
+             with:
+                java-version: '17' 
+
+           - name: Build and run tests
+             run: ${{ inputs.test_command }}

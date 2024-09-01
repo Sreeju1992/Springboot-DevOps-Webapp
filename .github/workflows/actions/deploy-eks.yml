@@ -1,0 +1,69 @@
+on:
+    workflow_call:
+        secrets:
+            role_id:
+                required: true
+
+            DOCKERHUB_USERNAME:
+                required: true
+            
+        inputs:
+            image_name:
+              required: true
+              type: string
+            helm_chart_path:
+              required: true
+              type: string
+            release_name:
+              required: true
+              type: string
+            cluster_name:
+              required: true
+              type: string
+            region:
+              required: true
+              type: string
+            tag:
+              required: true
+              type: string
+
+        
+    permissions:
+        id-token: write
+        contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Install kubectl
+          run: |
+            curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+            chmod +x ./kubectl
+            sudo mv ./kubectl /usr/local/bin/kubectl
+
+        - name: Install Helm
+          run: |
+            curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+            chmod 700 get_helm.sh
+            ./get_helm.sh
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+              aws-region: ${{ inputs.region }}
+              role-to-assume: ${{ secrets.ROLE_ID }}
+              role-session-name: GitHubActions
+
+        - name: Set up kubeconfig
+          run: aws eks update-kubeconfig --name ${{ inputs.cluster_name }} --region ${{ inputs.region }} --role-arn ${{ secrets.ROLE_ID }}
+
+        - name: Deploy to EKS using Helm
+          run: |
+            helm upgrade --install ${{ inputs.release_name }} ${{ inputs.helm_chart_path }} \
+              --set image.repository=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }} \
+              --set image.tag=${{ inputs.tag }}
