@@ -26,8 +26,10 @@ on:
             tag:
               required: true
               type: string
-
-        
+            ingress_label:
+              required: true
+              type: string
+      
 permissions:
     id-token: write
     contents: read
@@ -67,3 +69,19 @@ jobs:
             helm upgrade --install ${{ inputs.release_name }} ${{ inputs.helm_chart_path }} \
               --set image.repository=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.image_name }} \
               --set image.tag=${{ inputs.tag }}
+
+        - name: Get Ingress Resource Name
+          id: get-ingress-name
+          run: |
+              INGRESS_NAME=$(kubectl get ingress -l ${{ inputs.ingress_label }} -o jsonpath='{.items[0].metadata.name}')
+              echo "INGRESS_NAME=${INGRESS_NAME}" >> $GITHUB_ENV
+            
+        - name: Retrieve ALB URL
+          id: get-alb-url
+          run: |
+              ALB_URL=$(kubectl get ingress ${{ env.INGRESS_NAME }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo "ALB_URL=${ALB_URL}" >> $GITHUB_ENV
+
+        - name: Echo ALB URL
+          run: echo "The ALB URL is ${{ env.ALB_URL }}"
+            

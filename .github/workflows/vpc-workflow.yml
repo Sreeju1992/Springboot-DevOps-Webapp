@@ -1,5 +1,8 @@
 name: VPC resource provisioning workflow
-on: workflow_dispatch
+on:
+  push:
+    branches:
+    - main
 
 permissions:
     id-token: write
@@ -39,7 +42,7 @@ jobs:
           uses: aws-actions/configure-aws-credentials@v4
           with:
             aws-region: us-east-1
-            role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
+            role-to-assume: ${{ secrets.ROLE_ID }}
             role-session-name: GitHubActions
 
         - name: Terraform init
@@ -55,12 +58,7 @@ jobs:
           working-directory: IAC/VPC-EKS
           run: terraform validate
           continue-on-error: false
-
-        - name: Setup EKS Cluster kubeconfig
-          run: |
-              aws eks update-kubeconfig --name Rakbank-Dev-eksdemo1 --region us-east-1 --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
-
-        
+  
         - name: Terraform Plan
           working-directory: IAC/VPC-EKS
           run: terraform plan
@@ -109,14 +107,14 @@ jobs:
             uses: aws-actions/configure-aws-credentials@v4
             with:
               aws-region: us-east-1
-              role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
+              role-to-assume: ${{ secrets.ROLE_ID }}
               role-session-name: GitHubActions
 
           - name: Setup EKS Cluster kubeconfig
             env:
               CLUSTER_NAME: ${{ needs.vpc_ci.outputs.cluster_name }}
             run: |
-              aws eks update-kubeconfig --name $CLUSTER_NAME --region us-east-1 --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/Rakbank-Githubrunner-role
+              aws eks update-kubeconfig --name $CLUSTER_NAME --region us-east-1 --role-arn ${{ secrets.ROLE_ID }}
   
           - name: Terraform init
             working-directory: IAC/alb
@@ -161,8 +159,5 @@ jobs:
               kubectl get deployments -o wide
               kubectl get ingress
               kubectl describe ingress hello-rakbank-springboot-app
-              kubectl describe pod hello-rakbank-springboot-app-6bdccdfb96-jw7kz
-              kubectl logs -f hello-rakbank-springboot-app-6bdccdfb96-jw7kz
-              kubectl logs -f aws-load-balancer-controller-8c59b9bdd-5g6pf -n kube-system
-
+              
           

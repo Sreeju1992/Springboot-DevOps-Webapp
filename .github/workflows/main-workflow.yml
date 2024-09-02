@@ -1,5 +1,12 @@
 name: Main Workflow
-on: workflow_dispatch
+on:
+    workflow_run:
+      workflows: ["VPC resource provisioning workflow"]
+      types:
+        - completed
+    push:
+      branches:
+        - main
 
 permissions:
   id-token: write
@@ -34,6 +41,7 @@ jobs:
           region: us-east-1
           cluster_name: Rakbank-Dev-eksdemo1
           tag: v2
+          ingress_label: app.kubernetes.io/name=springboot-app
 
 
 
